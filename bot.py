@@ -1,4 +1,6 @@
-﻿import discord
+﻿import datetime
+
+import discord
 import os
 import requests
 from dotenv import load_dotenv
@@ -16,11 +18,11 @@ async def on_ready():
     guild_count = 0
     for guild in bot.guilds:
         guild_count = guild_count + 1
-    print("Bot is in " + str(guild_count) + " guilds.")
-    print(guild.name)
+    print(f"Bot is in {guild_count} guild/s.")
+    print(f"Guilds: {guild.name} | ID: {guild.id}")
 
 
-@bot.command(description="Displays all available commands.")
+@bot.command(description="Displays all available commands.", guild_ids=[guild])
 async def pryd_help(ctx):
     embed = discord.Embed(color=discord.Color.blurple())
     embed.set_author(name="Help : list of commands available")
@@ -30,27 +32,31 @@ async def pryd_help(ctx):
     await ctx.respond(embed=embed)
 
 
-@bot.command(description="Sends link to Prydwen.")
+@bot.command(description="Sends a link to Prydwen.", guild_ids=[guild])
 async def prydwen(ctx):
     embed = discord.Embed(title="Prydwen | All characters.", url="https://www.prydwen.gg/star-rail/characters",
-                          color=discord.Color.purple())
+                          color=discord.Color.blue())
     await ctx.respond(embed=embed)
 
 
-@bot.command()
+@bot.command(description="Sends a link to the specific characters profile, on Prydwen.", guild_ids=[guild])
 async def prydchar(ctx, character: str):
-    character_name = character
+    character_name = character.lower()
     response = requests.get("https://www.prydwen.gg/star-rail/characters/" + character_name)
 
     if response.status_code == 404:
-        await ctx.respond('! Invalid character name. \n'
-                          'If the character has a space between two names/words, please separate with a line '
-                          '(ex: black-swan)')
+        embed = discord.Embed(color=discord.Color.red())
+        embed.set_author(name="! Invalid Character name !")
+        embed.add_field(name="If the character has a space between two names/words, please separate with a line", 
+                        value="(ex: black-swan)", inline=False)
     else:
-        embed = discord.Embed(title="Prydwen | " + character_name,
-                              url="https://www.prydwen.gg/star-rail/characters/" + character_name,
+        title = character_name.title()
+        embed = discord.Embed(title="Prydwen | " + title,
+                              url="https://www.prydwen.gg/star-rail/characters/" + title,
                               color=discord.Color.blue())
-        await ctx.respond(embed=embed)
+        # embed.set_footer(icon_url=ctx.author.avatar_url, text=ctx.author)
+        
+    await ctx.respond(embed=embed)
 
 
 bot.run(config)
