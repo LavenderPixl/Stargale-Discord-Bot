@@ -1,6 +1,4 @@
-﻿import datetime
-
-import discord
+﻿import discord
 import os
 import requests
 from dotenv import load_dotenv
@@ -47,15 +45,13 @@ async def prydchar(ctx, character: str):
     if response.status_code == 404:
         embed = discord.Embed(color=discord.Color.red())
         embed.set_author(name="! Invalid Character name !")
-        embed.add_field(name="If the character has a space between two names/words, please separate with a line", 
+        embed.add_field(name="If the character has a space between two names/words, please separate with a line",
                         value="(ex: black-swan)", inline=False)
     else:
-        title = character_name.title()
-        embed = discord.Embed(title="Prydwen | " + title,
-                              url="https://www.prydwen.gg/star-rail/characters/" + title,
+        embed = discord.Embed(title="Prydwen | " + character_name,
+                              url="https://www.prydwen.gg/star-rail/characters/" + character_name,
                               color=discord.Color.blue())
-        # embed.set_footer(icon_url=ctx.author.avatar_url, text=ctx.author)
-        
+
     await ctx.respond(embed=embed)
 
 
