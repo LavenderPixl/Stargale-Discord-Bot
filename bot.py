@@ -14,7 +14,6 @@ guild = os.getenv("GUILD_ID")
 
 intents = discord.Intents.all()
 bot = discord.Bot(intents=intents)
-ACTIVE_MESSAGES = []
 
 
 @bot.event
