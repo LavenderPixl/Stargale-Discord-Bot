@@ -41,7 +41,7 @@ async def profile_embed(data):
 
 async def character_embed(char):
     embed = discord.Embed(title=f"{char.name}",
-                          description=f"Level: {char.level} | Rarity: {rarity(char.rarity)}  ",
+                          description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
                           color=discord.Color.blurple())
     embed.set_image(url=f"{char.portrait}")
     return embed
@@ -56,49 +56,70 @@ async def rarity(stars: int):
     return fin
 
 
-class MyButton(discord.ui.View, StarrailInfoParsed):
-    char_id: int = 0
+async def get_user(uid):
+    data: StarrailInfoParsed = await client.fetch_user(uid, replace_icon_name_with_url=True)
+    return data
 
-    @discord.ui.button(label=f"{StarrailInfoParsed.player.name}", style=discord.ButtonStyle.primary,
-                       emoji=f"{StarrailInfoParsed.player.avatar}")
+
+class MyButton(discord.ui.View):
+    def __init__(self, data, timeout=None):
+        super().__init__()
+        self.data = data
+
+    # emoji = f"Ava"
+    @discord.ui.button(label="Profile", custom_id="profile_btn", style=discord.ButtonStyle.primary)
     async def profile_button_callback(self, button, interaction):
-        await interaction.response.edit_message(embed=profile_embed(self.StarrailInfoParsed))
+        await interaction.response.edit_message(embed=await profile_embed(self.data))
 
-    @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
-                       emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
-    async def button_one_callback(self, button, interaction):
-        await interaction.response.edit_message(embed=character_embed(self.StarrailInfoParsed))
+    @discord.ui.button(label=f"1st Character", custom_id="char_1", style=discord.ButtonStyle.secondary)
+    async def button_1_callback(self, button, interaction):
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[0]))
 
-    # @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
-    #                    emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
-    # @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
-    #                    emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
-    # @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
-    #                    emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
-    # @discord.ui.button(label=f"{StarrailInfoParsed.characters[4].name}", style=discord.ButtonStyle.secondary,
-    #                    emoji=f"{StarrailInfoParsed.characters[4].portrait}")
-    # @discord.ui.button(label=f"{StarrailInfoParsed.characters[5].name}", style=discord.ButtonStyle.secondary,
-    #                    emoji=f"{StarrailInfoParsed.characters[5].portrait}")
+    @discord.ui.button(label=f"2nd Character", custom_id="char_2", style=discord.ButtonStyle.secondary)
+    async def button_2_callback(self, button, interaction):
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[1]))
+
+    @discord.ui.button(label=f"3rd Character", custom_id="char_3", style=discord.ButtonStyle.secondary)
+    async def button_3_callback(self, button, interaction):
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[2]))
+
+    @discord.ui.button(label=f"4th Character", custom_id="char_4", style=discord.ButtonStyle.secondary)
+    async def button_4_callback(self, button, interaction):
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[3]))
+
+
+# @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
+#                    emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
+# @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
+#                    emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
+# @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
+#                    emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
+# @discord.ui.button(label=f"{StarrailInfoParsed.characters[4].name}", style=discord.ButtonStyle.secondary,
+#                    emoji=f"{StarrailInfoParsed.characters[4].portrait}")
+# @discord.ui.button(label=f"{StarrailInfoParsed.characters[5].name}", style=discord.ButtonStyle.secondary,
+#                    emoji=f"{StarrailInfoParsed.characters[5].portrait}")
 
 
 @bot.slash_command(description="Displays user Profile")  # Create a slash command
 async def profile(ctx, uid: int):
     await ctx.defer(ephemeral=True)
     try:
-        data: StarrailInfoParsed = await client.fetch_user(
-            uid, replace_icon_name_with_url=True)
-        embed = profile_embed(data)
-        await ctx.respond(embed=embed, view=MyButton(ctx.view, data))
+        user = await get_user(uid)
+        embed = await profile_embed(user)
+        # data: StarrailInfoParsed = await client.fetch_user(
+        #     uid, replace_icon_name_with_url=True)
+        # await ctx.respond(embed=embed)
+        await ctx.respond(embed=embed, view=MyButton(user))
 
     except mihomo.errors.InvalidParams:
         await ctx.respond("Womp womp. Invalid UID. Please try again, with a different UID.")
         return None
-    # except mihomo.errors.UserNotFound:
-    # await ctx.respond(
-    #     "Womp womp. User not found. "
-    #     "\nThis could be because the wrapper is down. Did the game just update recently? "
-    #     "\nPlease try again later.")
-    # return None
+    except mihomo.errors.UserNotFound:
+        await ctx.respond(
+            "Womp womp. User not found. "
+            "\nThis could be because the wrapper is down or it took too long. Did the game just update recently? "
+            "\nPlease try again later.")
+        return None
 
 
 # @sg.command(description="Displays all available commands.", guild_ids=guild)
