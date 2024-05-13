@@ -43,7 +43,7 @@ async def character_embed(char):
     embed = discord.Embed(title=f"{char.name}",
                           description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
                           color=discord.Color.blurple())
-    embed.set_image(url=f"{char.portrait}")
+    embed.set_image(url=f"{char.preview}")
     return embed
 
 
@@ -61,43 +61,59 @@ async def get_user(uid):
     return data
 
 
-class MyButton(discord.ui.View):
-    def __init__(self, data, timeout=None):
-        super().__init__()
+class CharButtons(discord.ui.View):
+    def __init__(self, data):
+        super().__init__(timeout=None)
         self.data = data
+        self.idx = 0
+        for i in self.children:
+            if f"char{self.idx}" in i.custom_id:
+                i.label = f"{data.characters[self.idx].name}"
+                self.idx += 1
+        self.idx = 0
 
-    # emoji = f"Ava"
     @discord.ui.button(label="Profile", custom_id="profile_btn", style=discord.ButtonStyle.primary)
     async def profile_button_callback(self, button, interaction):
         await interaction.response.edit_message(embed=await profile_embed(self.data))
 
-    @discord.ui.button(label=f"1st Character", custom_id="char_1", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label=f"1", custom_id="char0", style=discord.ButtonStyle.secondary)
     async def button_1_callback(self, button, interaction):
-        await interaction.response.edit_message(embed=await character_embed(self.data.characters[0]))
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx]))
 
-    @discord.ui.button(label=f"2nd Character", custom_id="char_2", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label=f"2", custom_id="char1", style=discord.ButtonStyle.secondary)
     async def button_2_callback(self, button, interaction):
-        await interaction.response.edit_message(embed=await character_embed(self.data.characters[1]))
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx+1]))
 
-    @discord.ui.button(label=f"3rd Character", custom_id="char_3", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label=f"3", custom_id="char2", style=discord.ButtonStyle.secondary)
     async def button_3_callback(self, button, interaction):
-        await interaction.response.edit_message(embed=await character_embed(self.data.characters[2]))
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx+2]))
 
-    @discord.ui.button(label=f"4th Character", custom_id="char_4", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label=f"4", custom_id="char3", style=discord.ButtonStyle.secondary)
     async def button_4_callback(self, button, interaction):
-        await interaction.response.edit_message(embed=await character_embed(self.data.characters[3]))
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx+3]))
 
+    @discord.ui.button(label=">", custom_id="next_btn", style=discord.ButtonStyle.grey)
+    async def display_next(self, button, interaction):
+        if button.label == ">":
+            button.label = "<"
+            self.idx = 4
+            i = 0
+            char_id = 4
+            for x in self.children:
+                if f"char{i}" in x.custom_id:
+                    x.label = f"{self.data.characters[char_id].name}"
+                    i += 1
+                    char_id += 1
+        else:
+            button.label = ">"
+            self.idx = 0
+            i = 0
+            for x in self.children:
+                if f"char{i}" in x.custom_id:
+                    x.label = f"{self.data.characters[i].name}"
+                    i += 1
 
-# @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
-#                    emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
-# @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
-#                    emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
-# @discord.ui.button(label=f"{StarrailInfoParsed.characters[char_id].name}", style=discord.ButtonStyle.secondary,
-#                    emoji=f"{StarrailInfoParsed.characters[char_id].portrait}")
-# @discord.ui.button(label=f"{StarrailInfoParsed.characters[4].name}", style=discord.ButtonStyle.secondary,
-#                    emoji=f"{StarrailInfoParsed.characters[4].portrait}")
-# @discord.ui.button(label=f"{StarrailInfoParsed.characters[5].name}", style=discord.ButtonStyle.secondary,
-#                    emoji=f"{StarrailInfoParsed.characters[5].portrait}")
+        await interaction.response.edit_message(view=self)
 
 
 @bot.slash_command(description="Displays user Profile")  # Create a slash command
@@ -106,10 +122,7 @@ async def profile(ctx, uid: int):
     try:
         user = await get_user(uid)
         embed = await profile_embed(user)
-        # data: StarrailInfoParsed = await client.fetch_user(
-        #     uid, replace_icon_name_with_url=True)
-        # await ctx.respond(embed=embed)
-        await ctx.respond(embed=embed, view=MyButton(user))
+        await ctx.respond(embed=embed, view=CharButtons(user))
 
     except mihomo.errors.InvalidParams:
         await ctx.respond("Womp womp. Invalid UID. Please try again, with a different UID.")
