@@ -1,6 +1,7 @@
 ﻿import discord
 import os
 
+import requests
 import mihomo.errors
 from mihomo import Language, MihomoAPI
 from mihomo.models import StarrailInfoParsed
@@ -25,6 +26,21 @@ async def on_ready():
     print(f"Guilds: {guild.name} | ID: {guild.id}")
 
 
+# HONKAI
+async def rarity(stars: int):
+    i: int = 0
+    fin: str = ""
+    while i < stars:
+        i += 1
+        fin += "⭐"
+    return fin
+
+
+async def get_user(uid):
+    data: StarrailInfoParsed = await client.fetch_user(uid, replace_icon_name_with_url=True)
+    return data
+
+
 async def profile_embed(data):
     embed = discord.Embed(title=f"{data.player.name}", description=f"Signature: {data.player.signature}",
                           color=discord.Color.blurple())
@@ -40,25 +56,54 @@ async def profile_embed(data):
 
 
 async def character_embed(char):
-    embed = discord.Embed(title=f"{char.name}",
-                          description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
-                          color=discord.Color.blurple())
-    embed.set_image(url=f"{char.preview}")
+    if char.element.name == "Physical":
+        embed = discord.Embed(title=f"{char.name}",
+                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+                              color=discord.Color.light_gray())
+        embed.set_image(url=f"{char.preview}")
+
+    if char.element.name == "Fire":
+        embed = discord.Embed(title=f"{char.name}",
+                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+                              color=discord.Color.red())
+        embed.set_image(url=f"{char.preview}")
+
+    if char.element.name == "Ice":
+        embed = discord.Embed(title=f"{char.name}",
+                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+                              color=discord.Color.blue())
+        embed.set_image(url=f"{char.preview}")
+
+    if char.element.name == "Lightning":
+        embed = discord.Embed(title=f"{char.name}",
+                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+                              color=discord.Color.nitro_pink())
+        embed.set_image(url=f"{char.preview}")
+
+    if char.element.name == "Wind":
+        embed = discord.Embed(title=f"{char.name}",
+                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+                              color=discord.Color.teal())
+        embed.set_image(url=f"{char.preview}")
+
+    if char.element.name == "Quantum":
+        embed = discord.Embed(title=f"{char.name}",
+                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+                              color=discord.Color.dark_purple())
+        embed.set_image(url=f"{char.preview}")
+
+    if char.element.name == "Imaginary":
+        embed = discord.Embed(title=f"{char.name}",
+                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+                              color=discord.Color.gold())
+        embed.set_image(url=f"{char.preview}")
+
+    # embed = discord.Embed(title=f"{char.name}",
+    #                       description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+    #                       color=discord.Color.dark_teal())
+    # embed.set_image(url=f"{char.preview}")
+
     return embed
-
-
-async def rarity(stars: int):
-    i: int = 0
-    fin: str = ""
-    while i < stars:
-        i += 1
-        fin += "⭐"
-    return fin
-
-
-async def get_user(uid):
-    data: StarrailInfoParsed = await client.fetch_user(uid, replace_icon_name_with_url=True)
-    return data
 
 
 class CharButtons(discord.ui.View):
@@ -82,15 +127,15 @@ class CharButtons(discord.ui.View):
 
     @discord.ui.button(label=f"2", custom_id="char1", style=discord.ButtonStyle.secondary)
     async def button_2_callback(self, button, interaction):
-        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx+1]))
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx + 1]))
 
     @discord.ui.button(label=f"3", custom_id="char2", style=discord.ButtonStyle.secondary)
     async def button_3_callback(self, button, interaction):
-        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx+2]))
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx + 2]))
 
     @discord.ui.button(label=f"4", custom_id="char3", style=discord.ButtonStyle.secondary)
     async def button_4_callback(self, button, interaction):
-        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx+3]))
+        await interaction.response.edit_message(embed=await character_embed(self.data.characters[self.idx + 3]))
 
     @discord.ui.button(label=">", custom_id="next_btn", style=discord.ButtonStyle.grey)
     async def display_next(self, button, interaction):
@@ -116,7 +161,7 @@ class CharButtons(discord.ui.View):
         await interaction.response.edit_message(view=self)
 
 
-@bot.slash_command(description="Displays user Profile")  # Create a slash command
+@bot.slash_command(description="Displays user Profile")
 async def profile(ctx, uid: int):
     await ctx.defer(ephemeral=True)
     try:
@@ -135,19 +180,43 @@ async def profile(ctx, uid: int):
         return None
 
 
-# @sg.command(description="Displays all available commands.", guild_ids=guild)
-# async def help(ctx):
-#     await prydwen.pryd_help(ctx)
-# 
-# 
-# @sg.command(description="Sends a link to Prydwen.", guild_ids=guild)
-# async def prydwen(ctx):
-#     await prydwen.pryd_prydwen(ctx)
-# 
-# 
-# @sg.command(description="Sends a link to the specific characters profile, on Prydwen.", guild_ids=guild)
-# async def character(ctx, ch: str):
-#     await prydwen.pryd_character_profile(ctx, ch)
-#     
+# PRYDWEN
+@bot.slash_command(description="Displays all available commands.")
+async def help_sg(ctx):
+    await ctx.defer(ephemeral=True)
+    embed = discord.Embed(title="Help : list of commands available", color=discord.Color.brand_green())
+    embed.add_field(name="/help_sg", value="Shows this message", inline=False)
+    embed.add_field(name="/prydwen", value="Link to Prydwen", inline=False)
+    embed.add_field(name="/character [character name]", value="Link to specific character, on Prydwen.", inline=False)
+    await ctx.respond(embed=embed)
+
+
+@bot.slash_command(description="Sends a link to Prydwen.")
+async def prydwen(ctx):
+    await ctx.defer(ephemeral=True)
+    embed = discord.Embed(title="Prydwen | All characters.", url="https://www.prydwen.gg/star-rail/characters",
+                          color=discord.Color.blue())
+    await ctx.respond(embed=embed)
+
+
+@bot.slash_command(description="Sends a link to the specific characters profile, on Prydwen.")
+async def character(ctx, ch: str):
+    await ctx.defer(ephemeral=True)
+    character_name = ch.lower()
+    titled_name = ch.title()
+    response = requests.get("https://www.prydwen.gg/star-rail/characters/" + character_name)
+
+    if response.status_code == 404:
+        embed = discord.Embed(color=discord.Color.red())
+        embed.set_author(name="! Invalid Character name !")
+        embed.add_field(name="If the character has a space between two names/words, please separate with a line",
+                        value="(ex: black-swan)", inline=False)
+    else:
+        embed = discord.Embed(title="Prydwen | " + titled_name,
+                              url="https://www.prydwen.gg/star-rail/characters/" + character_name,
+                              color=discord.Color.blue())
+
+    await ctx.respond(embed=embed)
+
 
 bot.run(config)
