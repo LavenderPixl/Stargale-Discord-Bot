@@ -55,53 +55,35 @@ async def profile_embed(data):
     return embed
 
 
+def get_element_color(element):
+    match element:
+        case "Physical":
+            return discord.Color.light_gray()
+        case "Fire":
+            return discord.Color.red()
+        case "Ice":
+            return discord.Color.blue()
+        case "Lightning":
+            return discord.Color.nitro_pink()
+        case "Wind":
+            return discord.Color.teal()
+        case "Quantum":
+            return discord.Color.dark_purple()
+        case "Imaginary":
+            return discord.Color.gold()
+        case _: # Should never happen!
+            print("All good. Couldn't find element.")
+            return discord.Color.blurple()
+
+
 async def character_embed(char):
-    if char.element.name == "Physical":
-        embed = discord.Embed(title=f"{char.name}",
-                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
-                              color=discord.Color.light_gray())
-        embed.set_image(url=f"{char.preview}")
-
-    if char.element.name == "Fire":
-        embed = discord.Embed(title=f"{char.name}",
-                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
-                              color=discord.Color.red())
-        embed.set_image(url=f"{char.preview}")
-
-    if char.element.name == "Ice":
-        embed = discord.Embed(title=f"{char.name}",
-                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
-                              color=discord.Color.blue())
-        embed.set_image(url=f"{char.preview}")
-
-    if char.element.name == "Lightning":
-        embed = discord.Embed(title=f"{char.name}",
-                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
-                              color=discord.Color.nitro_pink())
-        embed.set_image(url=f"{char.preview}")
-
-    if char.element.name == "Wind":
-        embed = discord.Embed(title=f"{char.name}",
-                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
-                              color=discord.Color.teal())
-        embed.set_image(url=f"{char.preview}")
-
-    if char.element.name == "Quantum":
-        embed = discord.Embed(title=f"{char.name}",
-                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
-                              color=discord.Color.dark_purple())
-        embed.set_image(url=f"{char.preview}")
-
-    if char.element.name == "Imaginary":
-        embed = discord.Embed(title=f"{char.name}",
-                              description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
-                              color=discord.Color.gold())
-        embed.set_image(url=f"{char.preview}")
-
-    # embed = discord.Embed(title=f"{char.name}",
-    #                       description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
-    #                       color=discord.Color.dark_teal())
-    # embed.set_image(url=f"{char.preview}")
+    embed = discord.Embed(title=f"{char.name}",
+                          description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+                          color=get_element_color(char.element.name))
+    embed.add_field(name="Stats: ", value="", inline=False)
+    embed.add_field(name=f"", value="", inline=True)
+    embed.add_field(name=f"{char.attributes[0].name}:", value=f"{char.attributes[0].displayed_value}", inline=True)
+    embed.set_image(url=f"{char.preview}")
 
     return embed
 
