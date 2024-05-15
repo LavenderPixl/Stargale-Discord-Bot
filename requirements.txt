@@ -1,4 +1,4 @@
-﻿discord~=2.3.2
+﻿py-cord==2.5.0
 python-dotenv~=1.0.1
 requests~=2.31.0
-mihomo~=2.0.2
+mihomo @ git+https://github.com/KT-Yeh/mihomo@v2.0.2

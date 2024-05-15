@@ -1,0 +1,8 @@
+﻿services:
+  bot:
+    build:
+      context: .
+    develop:
+      watch:
+        - action: rebuild
+          path: .
