@@ -84,23 +84,22 @@ def clean_data(char):
             else:
                 res = "{:.1f}".format(i.value * 100) + "%"
             li.update({i.name: res})
-
-    print(li.items())
     return li
 
 
 async def character_embed(char):
     embed = discord.Embed(title=f"{char.name}",
-                          description=f"Level: {char.level} | Rarity: {"⭐" * char.rarity} ",
+                          description=f"Lv. {char.level} | Rarity: {"⭐" * char.rarity}  | E: {char.eidolon}",
                           color=get_element_color(char.element.name))
-    embed.add_field(name="Stats: ", value="", inline=False)
+    embed.add_field(name=f"Lightcone: {char.light_cone.name}", value=f"Lv. {char.light_cone.level} | Rarity: {"⭐" * char.light_cone.rarity} | S: {char.light_cone.superimpose}", inline=False)
+    # embed.add_field(name="Stats: ", value="", inline=False)
 
     for k, v in clean_data(char).items():
         embed.add_field(name=f"{k}:", value=f"{v}", inline=True)
     embed.set_image(url=f"{char.preview}")
 
     return embed
-
+    
 
 class CharButtons(discord.ui.View):
     def __init__(self, data):
