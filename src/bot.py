@@ -12,7 +12,6 @@ client = MihomoAPI(language=Language.EN)
 
 load_dotenv()
 config = os.getenv("DISCORD_TOKEN")
-guild = os.getenv("GUILD_ID")
 
 intents = discord.Intents.all()
 bot = discord.Bot(intents=intents)
@@ -24,7 +23,8 @@ async def on_ready():
     for guild in bot.guilds:
         guild_count = guild_count + 1
     print(f"Bot is in {guild_count} guild/s.")
-    print(f"Guilds: {guild.name} | ID: {guild.id}")
+    for guild in bot.guilds:
+        print(f"Guilds: {guild.name} | ID: {guild.id}")
 
 
 # HONKAI
@@ -95,7 +95,6 @@ async def character_embed(char):
                     value=f"Lv. {char.light_cone.level} | Rarity: {"⭐" * char.light_cone.rarity} | S: {char.light_cone.superimpose}",
                     inline=False)
     embed.set_thumbnail(url=f"{char.element.icon}")
-    # embed.add_field(name="Stats: ", value="", inline=False)
 
     for k, v in clean_data(char).items():
         embed.add_field(name=f"{k}:", value=f"{v}", inline=True)
