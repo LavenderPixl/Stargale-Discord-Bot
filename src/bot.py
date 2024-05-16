@@ -27,7 +27,7 @@ async def on_ready():
     print(f"Guilds: {guild.name} | ID: {guild.id}")
 
 
-#HONKAI
+# HONKAI
 async def get_user(uid):
     data: StarrailInfoParsed = await client.fetch_user(uid, replace_icon_name_with_url=True)
     return data
@@ -91,7 +91,10 @@ async def character_embed(char):
     embed = discord.Embed(title=f"{char.name}",
                           description=f"Lv. {char.level} | Rarity: {"⭐" * char.rarity}  | E: {char.eidolon}",
                           color=get_element_color(char.element.name))
-    embed.add_field(name=f"Lightcone: {char.light_cone.name}", value=f"Lv. {char.light_cone.level} | Rarity: {"⭐" * char.light_cone.rarity} | S: {char.light_cone.superimpose}", inline=False)
+    embed.add_field(name=f"Lightcone: {char.light_cone.name}",
+                    value=f"Lv. {char.light_cone.level} | Rarity: {"⭐" * char.light_cone.rarity} | S: {char.light_cone.superimpose}",
+                    inline=False)
+    embed.set_thumbnail(url=f"{char.element.icon}")
     # embed.add_field(name="Stats: ", value="", inline=False)
 
     for k, v in clean_data(char).items():
