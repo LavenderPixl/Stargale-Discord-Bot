@@ -10,6 +10,7 @@ It allows you to see your own and friends Honkai profiles, as well as the charac
 To run: docker compose up --build
 
 NEEDS: A .env file containing your Discord Bot token, and Guild(server) ID.
+
 *Syntax:*
 
 DISCORD_TOKEN="BOT_TOKEN"
