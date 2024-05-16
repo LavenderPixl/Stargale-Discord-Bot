@@ -3,6 +3,7 @@ import os
 
 import requests
 import mihomo.errors
+from collections import defaultdict
 from mihomo import Language, MihomoAPI
 from mihomo.models import StarrailInfoParsed
 from dotenv import load_dotenv
@@ -26,16 +27,7 @@ async def on_ready():
     print(f"Guilds: {guild.name} | ID: {guild.id}")
 
 
-# HONKAI
-async def rarity(stars: int):
-    i: int = 0
-    fin: str = ""
-    while i < stars:
-        i += 1
-        fin += "⭐"
-    return fin
-
-
+#HONKAI
 async def get_user(uid):
     data: StarrailInfoParsed = await client.fetch_user(uid, replace_icon_name_with_url=True)
     return data
@@ -56,33 +48,55 @@ async def profile_embed(data):
 
 
 def get_element_color(element):
-    match element:
-        case "Physical":
-            return discord.Color.light_gray()
-        case "Fire":
-            return discord.Color.red()
-        case "Ice":
-            return discord.Color.blue()
-        case "Lightning":
-            return discord.Color.nitro_pink()
-        case "Wind":
-            return discord.Color.teal()
-        case "Quantum":
-            return discord.Color.dark_purple()
-        case "Imaginary":
-            return discord.Color.gold()
-        case _: # Should never happen!
-            print("All good. Couldn't find element.")
-            return discord.Color.blurple()
+    element_colors = defaultdict(lambda: discord.Color.blurple(),
+                                 [("Physical", discord.Color.light_gray()),
+                                  ("Fire", discord.Color.red()),
+                                  ("Ice", discord.Color.blue()),
+                                  ("Lightning", discord.Color.nitro_pink()),
+                                  ("Wind", discord.Color.teal()),
+                                  ("Quantum", discord.Color.dark_purple()),
+                                  ("Imaginary", discord.Color.gold())
+                                  ])
+    return element_colors[element]
+
+
+def clean_data(char):
+    attributes = char.attributes
+    additions = char.additions
+    match = {}
+    for i in attributes:
+        for j in additions:
+            if i.name == j.name:
+                match[j.name] = (i, j)
+
+    li = {}
+    for k, v in match.items():
+        if not v[1].is_percent:
+            res = "{:.0f}".format(v[0].value + v[1].value)
+        else:
+            res = "{:.1f}".format((v[0].value + v[1].value) * 100) + "%"
+        li.update({v[0].name: res})
+
+    for i in additions:
+        if i.name not in li:
+            if not i.is_percent:
+                res = "{:.0f}".format(i.value)
+            else:
+                res = "{:.1f}".format(i.value * 100) + "%"
+            li.update({i.name: res})
+
+    print(li.items())
+    return li
 
 
 async def character_embed(char):
     embed = discord.Embed(title=f"{char.name}",
-                          description=f"Level: {char.level} | Rarity: {await rarity(char.rarity)}  ",
+                          description=f"Level: {char.level} | Rarity: {"⭐" * char.rarity} ",
                           color=get_element_color(char.element.name))
     embed.add_field(name="Stats: ", value="", inline=False)
-    embed.add_field(name=f"", value="", inline=True)
-    embed.add_field(name=f"{char.attributes[0].name}:", value=f"{char.attributes[0].displayed_value}", inline=True)
+
+    for k, v in clean_data(char).items():
+        embed.add_field(name=f"{k}:", value=f"{v}", inline=True)
     embed.set_image(url=f"{char.preview}")
 
     return embed
