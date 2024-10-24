@@ -1,5 +1,5 @@
 ## Stargale 
-Stargale is a Discord Bot made with Python for Honkai players!
+Stargale is a Discord Bot made in Python for Honkai players!
 
 Use Stargale to view Honkai players' profiles, and their featured characters, as well as their stats!
  
