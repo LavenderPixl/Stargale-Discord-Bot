@@ -1,14 +1,27 @@
-Stargale is a Discord Bot for Honkai players!
+## Stargale 
+Stargale is a Discord Bot made with Python for Honkai players!
 
-It allows you to see your own and friends Honkai profiles, as well as the characters displayed on their profile.
+Use Stargale to view Honkai players' profiles, and their featured characters, as well as their stats!
+ 
+ Stargale can also send you a direct link to a characters Prydwen page. 
+( *https://prydwen.gg* )
+## Deployment
 
+To run this project:
 
+```bash
+  docker compose up --build
+```
+## Environment Variables
 
-## Requirements
-To run: docker compose up --build
+To run this project, you will need to add the bot token into your .env file
 
-NEEDS: A .env file containing your Discord Bot token.
+`DISCORD_TOKEN`
 
-*Syntax:*
+### Commands
 
-DISCORD_TOKEN="BOT_TOKEN"
+- /prydwen - Sends a link to Prydwen.
+- /character - Sends a link to the specific characters profile on Prydwen; Requires characters' name.
+- /help_sg - Displays all available commands.
+- /profile - Displays User profile; Requires their Honkai UID.
+
